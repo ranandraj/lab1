@@ -1,0 +1,17 @@
+---
+- name: Copy LB config file to tmp
+  template:
+    src: /git/workingdir/ansible-play/httpdokcfg/templates/lb_config.conf
+    dest: /tmp/lb_config.conf
+
+
+- name: Create Apache WebServer httpd 2.4 Docker Image
+  #command: docker create --name proxylb --network brdgnet1 -p 8070:80 httpd:2.4
+  command: docker create  --name httplb --network brdgnet1 -p 8071:80 centos:httpd /bin/bash -c "/usr/sbin/httpd -D FOREGROUND"
+
+
+- name: Copy LB config file from /tmp to conf.d directory
+  command: docker cp /tmp/lb_config.conf httplb:/etc/httpd/conf.d/lb_config.conf
+
+- name: Start Docker Container
+  command: docker start httplb

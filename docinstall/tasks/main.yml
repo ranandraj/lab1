@@ -1,0 +1,11 @@
+---
+- name: Install Docker
+  yum:
+    name: docker
+    state: latest
+  notify: Restart Docker Service
+
+- name: Set Bridged Network for container to communicate to each other
+  command: docker network create brdgnet1
+  ignore_errors: yes
+ 

@@ -1,0 +1,4 @@
+---
+virtlb: virtuallb
+webapp1_IP: "{{ hostvars[inventory_hostname]['IP_webapp1']}}"
+webapp2_IP: "{{ hostvars[inventory_hostname]['IP_webapp2']}}"

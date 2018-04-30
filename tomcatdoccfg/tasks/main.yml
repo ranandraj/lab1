@@ -1,0 +1,57 @@
+---
+- name: Copy war file to tmp
+  copy:
+    src: /git/workingdir/arcode/target/arcode-1.0-SNAPSHOT.war
+    dest: /tmp/test.war
+
+- name: Stop previous containers if exists
+  command: docker stop "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - webapp1
+    - webapp2
+    - httplb
+
+- name: Delete previous containers
+  command: docker rm "{{ item }}"
+  ignore_errors: yes
+  with_items:
+    - webapp1
+    - webapp2
+    - httplb
+
+
+- name: Create Docker Container. Note Containers hasn't started yet
+  command: docker create --name "{{ item.value.NAME }}" --network brdgnet1 -p "{{ item.value.PORT }}":8080 tomcat:7
+  with_dict: "{{ webapp }}"
+
+
+- name: Copy war to webapp directory
+  command: docker cp /tmp/test.war "{{ item }}":/usr/local/tomcat/webapps/test.war
+  with_items:
+    - webapp1
+    - webapp2
+
+
+- name: Start Docker Container
+  command: docker start "{{ item }}"
+  with_items:
+    - webapp1
+    - webapp2
+
+- name: Register IP Address of Webapp Servers
+  command: docker inspect -f '{''{ .NetworkSettings.Networks.brdgnet1.IPAddress }''}' "{{ item }}"  
+  register: r
+  with_items:
+    - webapp1
+    - webapp2
+
+- debug: msg="Get data of {{ item.item }}"
+  with_items: "{{r.results}}" 
+
+#- set_fact:  app =  "{{ item.stdout }}"
+#  with_items: "{{r.results}}"
+- set_fact: 
+    app: "{{ r.results | map(attribute='stdout') | list }}"
+  
+- debug: var=app

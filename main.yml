@@ -1,0 +1,15 @@
+---
+- hosts: webapp
+  vars:
+    webapp:
+      app1:
+        PORT: 8090
+        NAME: webapp1
+      app2:
+        PORT: 8091
+        NAME: webapp2
+  become: true
+  roles:
+    - docinstall
+    - tomcatdoccfg
+    - httpdokcfg
